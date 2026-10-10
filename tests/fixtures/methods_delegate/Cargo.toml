@@ -1,0 +1,9 @@
+[package]
+name = "fixture-methods-delegate"
+version = "0.0.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+atomic-delegate-macros = { git = "https://github.com/Uomocosa/lele-rust-linter", tag = "v0.0.1" }
