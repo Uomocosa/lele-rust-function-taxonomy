@@ -7,22 +7,28 @@ extern crate rustc_interface;
 extern crate rustc_middle;
 extern crate rustc_span;
 
+use std::path::Path;
+
+use derive_more::Deref;
+use lele_rust_function_taxonomy::constants;
+use lele_rust_function_taxonomy::lele_config;
 use rustc_driver::{Callbacks, Compilation};
 use rustc_interface::interface;
 use rustc_middle::ty::TyCtxt;
 
+#[path = "__basic__/mod.rs"]
+mod basic;
 mod build_graph;
 mod roots;
 
-use build_graph::{HonestBoundary, ReportConfig};
+use build_graph::ReportConfig;
 
-struct TaxonomyCallbacks {
-    report: bool,
-}
+#[derive(Deref)]
+struct ShouldReport(bool);
 
-impl Callbacks for TaxonomyCallbacks {
+impl Callbacks for ShouldReport {
     fn after_analysis(&mut self, _compiler: &interface::Compiler, tcx: TyCtxt<'_>) -> Compilation {
-        if self.report {
+        if **self {
             build_graph::run(tcx);
         }
         Compilation::Continue
@@ -30,68 +36,20 @@ impl Callbacks for TaxonomyCallbacks {
 }
 
 fn read_config() -> ReportConfig {
-    let path = std::env::var("LELE_TAXONOMY_CONFIG").unwrap_or_default();
-    let Ok(content) = std::fs::read_to_string(&path) else {
-        return ReportConfig {
-            honest_boundaries: Vec::new(),
-            declared_dishonest: Vec::new(),
-            declared_honest: Vec::new(),
-        };
-    };
-    let parsed: ConfigToml = toml::from_str(&content).unwrap_or_default();
-    let honest_boundaries = parsed
-        .lele
-        .boundary
-        .iter()
-        .filter(|b| b.require.as_deref() == Some("honest"))
-        .map(|b| HonestBoundary {
-            name: b.name.clone(),
-            folders: b.folders.clone(),
-        })
-        .collect();
+    let config = std::env::var_os(constants::ENV_MANIFEST)
+        .and_then(|manifest| lele_config::load(Path::new(&manifest)).ok())
+        .unwrap_or_default();
     ReportConfig {
-        honest_boundaries,
-        declared_dishonest: parsed.honesty.declared_dishonest,
-        declared_honest: parsed.honesty.declared_honest,
+        honest_boundaries: config.honest_boundaries().cloned().collect(),
+        declared_honest: config.declared_honest,
+        declared_dishonest: config.declared_dishonest,
     }
-}
-
-#[derive(serde::Deserialize, Default)]
-struct ConfigToml {
-    #[serde(default)]
-    lele: LeleSection,
-    #[serde(default)]
-    honesty: Honesty,
-}
-
-#[derive(serde::Deserialize, Default)]
-struct LeleSection {
-    #[serde(default)]
-    boundary: Vec<Boundary>,
-}
-
-#[derive(serde::Deserialize)]
-struct Boundary {
-    #[serde(default)]
-    name: String,
-    #[serde(default)]
-    folders: Vec<String>,
-    #[serde(default)]
-    require: Option<String>,
-}
-
-#[derive(serde::Deserialize, Default)]
-struct Honesty {
-    #[serde(default)]
-    declared_honest: Vec<String>,
-    #[serde(default)]
-    declared_dishonest: Vec<String>,
 }
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let primary = std::env::var_os("CARGO_PRIMARY_PACKAGE").is_some();
-    let report = primary && std::env::var_os("LELE_TAXONOMY_CONFIG").is_some();
+    let report = primary && std::env::var_os(constants::ENV_MANIFEST).is_some();
 
     let Some(real_rustc) = args.get(1) else {
         std::process::exit(1);
@@ -109,7 +67,7 @@ fn main() {
         std::process::exit(code);
     }
 
-    let mut callbacks = TaxonomyCallbacks { report };
+    let mut callbacks = ShouldReport(report);
     let code = rustc_driver::catch_with_exit_code(|| {
         rustc_driver::run_compiler(runner_args, &mut callbacks);
     });

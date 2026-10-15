@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use clap::Parser;
 
-use lele_rust_function_taxonomy::run;
+use lele_rust_function_taxonomy::{run, FailureReason, Outcome};
 
 #[derive(Parser, Debug)]
 #[command(
@@ -20,5 +20,17 @@ fn main() {
         .init();
 
     let args = Args::parse();
-    std::process::exit(run(args.manifest_path));
+    let code = match run(args.manifest_path) {
+        Outcome::NothingToCheck => {
+            println!("no honest boundaries configured — nothing to check");
+            0
+        }
+        Outcome::Clean => 0,
+        Outcome::Failed(FailureReason::CargoCheckFailed) => 1,
+        Outcome::Failed(reason) => {
+            eprintln!("{reason}");
+            1
+        }
+    };
+    std::process::exit(code);
 }
