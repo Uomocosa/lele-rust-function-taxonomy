@@ -11,6 +11,7 @@ rustup toolchain install nightly-2026-09-01   # rust-toolchain.toml pins it (+ r
 cargo install cargo-nextest
 cargo install just
 cargo install --git https://github.com/Uomocosa/lele-rust-linter lele-lint
+cargo binstall prek                           # hook runner (`prek install` via `just setup`)
 ```
 
 The MIR driver needs the pinned nightly's `rustc-dev` component; no system
@@ -20,6 +21,7 @@ libraries beyond that.
 
 ```sh
 just build | just clippy | just fmt | just test | just taxonomy | just lint
-just hooks      # point git at .githooks/
+just setup    # one-time per clone: install the prek git hooks
+just check    # run the full gate (same as CI)
 just ci
 ```
