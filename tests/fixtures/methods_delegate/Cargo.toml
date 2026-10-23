@@ -6,4 +6,4 @@ edition = "2021"
 [workspace]
 
 [dependencies]
-atomic-delegate-macros = { git = "https://github.com/Uomocosa/lele-rust-linter", tag = "v0.0.2" }
+atomic-delegate-macros = { git = "https://github.com/Uomocosa/lele-rust-linter", tag = "v0.0.3" }

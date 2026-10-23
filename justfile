@@ -21,6 +21,17 @@ taxonomy:
 lint:
     lele-lint .
 
+# --- tool install (reproducible) ---------------------------------------------
+# Install both binaries from this checkout, honouring Cargo.lock. The toolchain
+# comes from rust-toolchain.toml (nightly + rustc-dev) because the driver is
+# built with rustc_private.
+install:
+    cargo install --locked --force --path .
+
+# Fail fast when the installed binary is not the version this repo expects.
+tools:
+    test "$(lele-function-taxonomy --version)" = "lele-function-taxonomy 0.0.2"
+
 setup:
     prek install -t pre-commit -t pre-push
 

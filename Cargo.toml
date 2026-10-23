@@ -1,6 +1,6 @@
 [package]
 name = "lele-rust-function-taxonomy"
-version = "0.0.1"
+version = "0.0.2"
 edition = "2021"
 rust-version = "1.85"
 description = "Precise function honesty taxonomy via rustc MIR — a require=honest boundary must contain only honest functions"
@@ -16,7 +16,7 @@ name = "lele-taxonomy-driver"
 path = "src/driver/main.rs"
 
 [dependencies]
-atomic-delegate-macros = { git = "https://github.com/Uomocosa/lele-rust-linter", tag = "v0.0.2" }
+atomic-delegate-macros = { git = "https://github.com/Uomocosa/lele-rust-linter", tag = "v0.0.3" }
 clap = { version = "=4.6.6", features = ["derive"] }
 derive_more = { version = "=2.1.1", features = ["deref", "display", "from"] }
 thiserror = "=2.0.19"

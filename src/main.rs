@@ -7,6 +7,7 @@ use lele_rust_function_taxonomy::{run, FailureReason, Outcome};
 #[derive(Parser, Debug)]
 #[command(
     name = "lele-function-taxonomy",
+    version,
     about = "Checks that functions in require=honest boundary folders are honest (rustc MIR)"
 )]
 struct Args {
