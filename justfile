@@ -32,6 +32,11 @@ install:
 tools:
     test "$(lele-function-taxonomy --version)" = "lele-function-taxonomy 0.0.2"
 
+# Regenerate every fixture's committed Cargo.lock after changing its manifest
+# (fixtures are hermetic: the lock pins the exact dependency revisions).
+fixtures-lock:
+    for manifest in tests/fixtures/*/Cargo.toml; do cargo metadata --manifest-path "$manifest" --format-version 1 > /dev/null; done
+
 setup:
     prek install -t pre-commit -t pre-push
 

@@ -78,6 +78,13 @@ fn is_cargo_noise(line: &str) -> bool {
     t.starts_with("Checking ")
         || t.starts_with("Compiling ")
         || t.starts_with("Finished ")
+        || t.starts_with("Updating ")
+        || t.starts_with("Locking ")
+        || t.starts_with("Adding ")
+        || t.starts_with("Removing ")
+        || t.starts_with("Downloading ")
+        || t.starts_with("Downloaded ")
+        || t.starts_with("Blocking waiting for file lock")
         || t.starts_with("warning: build failed")
         || t.starts_with("error: could not compile")
 }
