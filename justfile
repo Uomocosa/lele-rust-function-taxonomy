@@ -22,11 +22,13 @@ lint:
     lele-lint .
 
 # --- tool install (reproducible) ---------------------------------------------
-# Install both binaries from this checkout, honouring Cargo.lock. The toolchain
+# Install the tool binary only, honouring Cargo.lock. `--bin` keeps the internal
+# `lele-taxonomy-driver` off PATH: the tool builds and runs its own copy from a
+# per-run target dir, so a second installed copy would only drift. The toolchain
 # comes from rust-toolchain.toml (nightly + rustc-dev) because the driver is
 # built with rustc_private.
 install:
-    cargo install --locked --force --path .
+    cargo install --locked --force --path . --bin lele-function-taxonomy
 
 # Show which binary each tool resolves to and its version. A `<fleet>/bin` shim
 # (written by `lele-release setup`) builds the sibling checkout; set
