@@ -11,26 +11,13 @@ pub fn try_from_path(
         return Ok(lele_config::Config::default());
     };
     let file = manifest.config_source();
-    let parsed: lele_config::LeleToml =
-        toml::from_str(&content).map_err(|error| lele_config::LeleTomlError::Invalid {
-            file,
-            reason: lele_config::ErrorReason(first_line(&error.to_string())),
-        })?;
+    let parsed: lele_config::LeleToml = toml::from_str(&content)
+        .map_err(|toml_error| lele_config::LeleTomlError::InvalidToml { file, toml_error })?;
     Ok(lele_config::Config {
         boundaries: parsed.lele.boundary,
         declared_honest: parsed.honesty.declared_honest,
         declared_dishonest: parsed.honesty.declared_dishonest,
     })
-}
-
-// needed helper: keep only the actionable first line of a toml error
-fn first_line(message: &str) -> String {
-    message
-        .lines()
-        .find(|line| !line.trim().is_empty())
-        .unwrap_or(message)
-        .trim()
-        .to_string()
 }
 
 #[cfg(test)]
