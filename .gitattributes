@@ -1,1 +1,4 @@
 Cargo.toml filter=lele-pins
+Cargo.lock filter=lele-pins
+tests/fixtures/**/Cargo.toml -filter
+tests/fixtures/**/Cargo.lock -filter
