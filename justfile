@@ -28,9 +28,11 @@ lint:
 install:
     cargo install --locked --force --path .
 
-# Fail fast when the installed binary is not the version this repo expects.
+# Show which binary each tool resolves to and its version. A `<fleet>/bin` shim
+# (written by `lele-release setup`) builds the sibling checkout; set
+# LELE_USE_INSTALLED=1 to use the installed binary instead.
 tools:
-    test "$(lele-function-taxonomy --version)" = "lele-function-taxonomy 0.0.2"
+    @for tool in lele-function-taxonomy; do printf '%-24s %s  %s\n' "$tool" "$(command -v "$tool")" "$("$tool" --version)"; done
 
 # Regenerate every fixture's committed Cargo.lock after changing its manifest
 # (fixtures are hermetic: the lock pins the exact dependency revisions).
