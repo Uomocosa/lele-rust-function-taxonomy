@@ -16,9 +16,8 @@ use rustc_driver::{Callbacks, Compilation};
 use rustc_interface::interface;
 use rustc_middle::ty::TyCtxt;
 
-#[path = "__basic__/mod.rs"]
-mod basic;
 mod build_graph;
+mod crate_function_index;
 mod roots;
 
 use build_graph::ReportConfig;
@@ -29,7 +28,7 @@ struct ShouldReport(bool);
 impl Callbacks for ShouldReport {
     fn after_analysis(&mut self, _compiler: &interface::Compiler, tcx: TyCtxt<'_>) -> Compilation {
         if **self {
-            build_graph::run(tcx);
+            build_graph::TaxonomyReport::emit(tcx);
         }
         Compilation::Continue
     }
@@ -37,7 +36,7 @@ impl Callbacks for ShouldReport {
 
 fn read_config() -> ReportConfig {
     let config = std::env::var_os(constants::ENV_MANIFEST)
-        .and_then(|manifest| lele_config::load(Path::new(&manifest)).ok())
+        .and_then(|manifest| lele_config::Config::try_from(Path::new(&manifest)).ok())
         .unwrap_or_default();
     ReportConfig {
         honest_boundaries: config.honest_boundaries().cloned().collect(),

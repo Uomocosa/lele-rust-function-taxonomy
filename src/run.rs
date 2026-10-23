@@ -4,7 +4,7 @@ use std::process::Command;
 use crate::basic::enums::Outcome;
 use crate::constants;
 use crate::lele_config;
-use crate::toolchain;
+use crate::toolchain::Toolchain;
 use crate::FailureReason;
 
 pub fn run(manifest_path: Option<PathBuf>) -> Outcome {
@@ -13,7 +13,7 @@ pub fn run(manifest_path: Option<PathBuf>) -> Outcome {
         return Outcome::Failed(FailureReason::ManifestNotFound { path: manifest });
     };
 
-    let config = match lele_config::load(&manifest) {
+    let config = match lele_config::Config::try_from(manifest.as_path()) {
         Ok(config) => config,
         Err(e) => return Outcome::Failed(FailureReason::Config(e)),
     };
@@ -22,19 +22,19 @@ pub fn run(manifest_path: Option<PathBuf>) -> Outcome {
         return Outcome::NothingToCheck;
     }
 
-    if let Err(e) = lele_config::validate(&manifest, &config) {
+    if let Err(e) = config.validate(manifest.as_path()) {
         return Outcome::Failed(FailureReason::Config(e));
     }
 
-    let Some(driver) = toolchain::driver_path().or_else(toolchain::build_driver) else {
+    let Some(driver) = Toolchain::driver_path().or_else(Toolchain::build_driver) else {
         return Outcome::Failed(FailureReason::DriverUnavailable);
     };
 
-    let target_dir = toolchain::target_dir();
+    let target_dir = Toolchain::target_dir();
 
     let lib_path = {
         let existing = std::env::var("LD_LIBRARY_PATH").unwrap_or_default();
-        let sysroot_lib = toolchain::sysroot_lib();
+        let sysroot_lib = Toolchain::sysroot_lib();
         if existing.is_empty() {
             sysroot_lib.to_string_lossy().into_owned()
         } else {
@@ -42,7 +42,7 @@ pub fn run(manifest_path: Option<PathBuf>) -> Outcome {
         }
     };
 
-    let mut command = Command::new(toolchain::pinned_cargo());
+    let mut command = Command::new(Toolchain::pinned_cargo());
     command
         .arg("check")
         .arg("--manifest-path")
@@ -54,7 +54,7 @@ pub fn run(manifest_path: Option<PathBuf>) -> Outcome {
         .env("CARGO_TARGET_DIR", &target_dir)
         .env("LD_LIBRARY_PATH", lib_path)
         .env("CARGO_BUILD_JOBS", constants::BUILD_JOBS);
-    toolchain::apply_pinned_env(&mut command);
+    Toolchain::apply_pinned_env(&mut command);
 
     match command.status() {
         Ok(status) if status.success() => Outcome::Clean,

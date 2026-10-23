@@ -29,3 +29,4 @@ pub use lele_config::LeleTomlError;
 pub use run::run;
 pub use tax001::Tax001;
 pub use tax002::Tax002;
+pub use toolchain::Toolchain;

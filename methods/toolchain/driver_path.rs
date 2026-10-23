@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use crate::basic::constants;
-use crate::toolchain;
+use crate::toolchain::Toolchain;
 
 pub fn driver_path() -> Option<PathBuf> {
     if let Ok(explicit) = std::env::var(constants::ENV_DRIVER) {
@@ -10,11 +10,19 @@ pub fn driver_path() -> Option<PathBuf> {
             return Some(candidate);
         }
     }
-    let built = toolchain::driver_target_dir().join("debug/lele-taxonomy-driver");
+    let built = Toolchain::driver_target_dir().join("debug/lele-taxonomy-driver");
     if built.is_file() {
         return Some(built);
     }
     None
 }
 
-// no test_usage necessary
+#[cfg(test)]
+mod tests {
+    use super::driver_path;
+
+    #[test]
+    fn test_usage() {
+        assert!(driver_path().is_none_or(|path| path.is_file()));
+    }
+}

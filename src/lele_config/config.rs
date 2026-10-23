@@ -1,3 +1,7 @@
+use std::path::Path;
+
+use atomic_delegate_macros::atomic_delegates;
+
 use crate::lele_config;
 
 #[derive(Debug, Clone, Default)]
@@ -20,6 +24,17 @@ impl Config {
     }
 }
 
+#[atomic_delegates]
+impl TryFrom<&Path> for Config {
+    type Error = lele_config::LeleTomlError;
+    fn try_from(manifest_path: &Path) -> Result<Self, Self::Error> {}
+}
+
+#[atomic_delegates]
+impl Config {
+    pub fn validate(&self, manifest_path: &Path) -> Result<(), lele_config::LeleTomlError> {}
+}
+
 #[cfg(test)]
 mod tests {
     use crate::lele_config;
@@ -35,7 +50,7 @@ mod tests {
         )
         .unwrap();
         std::fs::create_dir_all(tmp.path().join("src/core")).unwrap();
-        let loaded = lele_config::load(&manifest).unwrap();
+        let loaded = lele_config::Config::try_from(manifest.as_path()).unwrap();
         assert!(loaded.has_honest_boundary());
     }
 }

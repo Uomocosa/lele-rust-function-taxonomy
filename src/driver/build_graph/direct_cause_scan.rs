@@ -7,28 +7,44 @@ use rustc_middle::ty::{self, Instance, TyCtxt};
 use crate::build_graph;
 use crate::roots;
 
-pub fn classify(
-    tcx: TyCtxt<'_>,
-    def_id: LocalDefId,
-    config: &build_graph::ReportConfig,
+pub struct DirectCauseScan<'tcx, 'config> {
+    pub tcx: TyCtxt<'tcx>,
+    pub config: &'config build_graph::ReportConfig,
+}
+
+impl DirectCauseScan<'_, '_> {
+    pub fn of(&self, def_id: LocalDefId) -> Option<DirectCause> {
+        let path_str = self.tcx.def_path_str(def_id.to_def_id());
+        let item_path = roots::RustcItemPath(path_str.clone());
+        match (
+            item_path.is_declared_by(&self.config.declared_honest),
+            item_path.is_declared_by(&self.config.declared_dishonest),
+        ) {
+            (true, _) => None,
+            (_, true) => Some(DirectCause::DeclaredDishonest(path_str)),
+            _ => self.body_cause(def_id),
+        }
+    }
+
+    fn body_cause(&self, def_id: LocalDefId) -> Option<DirectCause> {
+        let body = self.tcx.optimized_mir(def_id);
+        let env = body.typing_env(self.tcx);
+        first_cause(self.tcx, body, env, &self.config.declared_honest)
+    }
+}
+
+// needed helper: first hidden-I/O cause across the body's basic blocks
+fn first_cause<'tcx>(
+    tcx: TyCtxt<'tcx>,
+    body: &Body<'tcx>,
+    env: ty::TypingEnv<'tcx>,
+    declared_honest: &[lele_config::CallPath],
 ) -> Option<DirectCause> {
-    let path_str = tcx.def_path_str(def_id.to_def_id());
-
-    if build_graph::matches_declared(&path_str, &config.declared_honest) {
-        return None;
-    }
-    if build_graph::matches_declared(&path_str, &config.declared_dishonest) {
-        return Some(DirectCause::DeclaredDishonest(path_str));
-    }
-
-    let body = tcx.optimized_mir(def_id);
-    let env = body.typing_env(tcx);
-
     for bb in body.basic_blocks.iter() {
         for stmt in &bb.statements {
             if let StatementKind::Assign(assign) = &stmt.kind {
                 let (_, rvalue) = &**assign;
-                if let Some(cause) = static_cause(tcx, env, rvalue, &config.declared_honest) {
+                if let Some(cause) = static_cause(tcx, env, rvalue, declared_honest) {
                     return Some(cause);
                 }
             }
@@ -38,7 +54,7 @@ pub fn classify(
         };
         match &term.kind {
             TerminatorKind::Call { func, .. } | TerminatorKind::TailCall { func, .. } => {
-                if let Some(cause) = call_cause(tcx, body, func, &config.declared_honest) {
+                if let Some(cause) = call_cause(tcx, body, func, declared_honest) {
                     return Some(cause);
                 }
             }
@@ -60,7 +76,8 @@ fn static_cause<'tcx>(
                 return None;
             };
             let static_id = constant.check_static_ptr(tcx)?;
-            if build_graph::matches_declared(&tcx.def_path_str(static_id), declared_honest) {
+            let static_path = roots::RustcItemPath(tcx.def_path_str(static_id));
+            if static_path.is_declared_by(declared_honest) {
                 return None;
             }
             let name = tcx.def_path_str(static_id);
@@ -87,7 +104,7 @@ fn static_cause<'tcx>(
 // needed helper: tracing/log callsite statics are sanctioned (logging is honest everywhere)
 fn is_logging_static<'tcx>(tcx: TyCtxt<'tcx>, ty: ty::Ty<'tcx>) -> bool {
     match ty.kind() {
-        ty::Adt(adt, _) => roots::is_logging_type(&tcx.def_path_str(adt.did())),
+        ty::Adt(adt, _) => roots::RustcItemPath(tcx.def_path_str(adt.did())).is_logging_type(),
         ty::Ref(_, inner, _) | ty::RawPtr(inner, _) => is_logging_static(tcx, *inner),
         ty::Array(inner, _) | ty::Slice(inner) => is_logging_static(tcx, *inner),
         _ => false,
@@ -109,11 +126,11 @@ fn call_cause<'tcx>(
         Ok(Some(instance)) => instance.def_id(),
         _ => *def_id,
     };
-    let path = tcx.def_path_str(callee);
-    if build_graph::matches_declared(&path, declared_honest) {
+    let callee_path = roots::RustcItemPath(tcx.def_path_str(callee));
+    if callee_path.is_declared_by(declared_honest) {
         return None;
     }
-    roots::is_io_root(&path, &[]).map(DirectCause::IoRoot)
+    callee_path.is_io_root(&[]).map(DirectCause::IoRoot)
 }
 
 // no test_usage necessary

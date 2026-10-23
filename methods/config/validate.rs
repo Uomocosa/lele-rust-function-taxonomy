@@ -3,11 +3,12 @@ use std::path::Path;
 use crate::lele_config;
 
 pub fn validate(
-    manifest_path: &Path,
     config: &lele_config::Config,
+    manifest_path: &Path,
 ) -> Result<(), lele_config::LeleTomlError> {
-    let root = manifest_path.parent().unwrap_or_else(|| Path::new("."));
-    let file = lele_config::ConfigSource(lele_config::display_path(manifest_path));
+    let manifest = lele_config::Manifest::from(manifest_path);
+    let root = manifest.parent().unwrap_or_else(|| Path::new("."));
+    let file = manifest.config_source();
     for boundary in &config.boundaries {
         if boundary.folders.is_empty() {
             return Err(lele_config::LeleTomlError::Invalid {
@@ -49,7 +50,7 @@ mod tests {
             "[[lele.boundary]]\nname = \"b\"\nwhy = \"w\"\nfolders = [\"src/nope\"]\nrequire = \"honest\"\n",
         )
         .unwrap();
-        let loaded = lele_config::load(&manifest).unwrap();
-        assert!(validate(&manifest, &loaded).is_err());
+        let loaded = lele_config::Config::try_from(manifest.as_path()).unwrap();
+        assert!(validate(&loaded, manifest.as_path()).is_err());
     }
 }

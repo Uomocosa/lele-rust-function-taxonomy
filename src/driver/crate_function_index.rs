@@ -8,21 +8,45 @@ use rustc_middle::mir::TerminatorKind;
 use rustc_middle::ty::{self, Instance, TyCtxt};
 use rustc_span::Span;
 
-use crate::basic::structs::Built;
 use crate::build_graph;
 
-pub fn graph(tcx: TyCtxt<'_>, config: &build_graph::ReportConfig) -> Built {
+pub struct CrateFunctionIndex {
+    pub graph: HonestyGraph,
+    pub paths: HashMap<LocalDefId, String>,
+    pub node_ids: HashMap<LocalDefId, NodeId>,
+    pub spans: HashMap<LocalDefId, Span>,
+}
+
+impl CrateFunctionIndex {
+    pub fn from_crate(tcx: TyCtxt<'_>, config: &build_graph::ReportConfig) -> Self {
+        let owners = sorted_function_owners(tcx);
+        let crate_functions = collect_nodes(tcx, config, &owners);
+        with_calls_and_closures_linked(tcx, &owners, crate_functions)
+    }
+}
+
+// needed helper: every function-like body in path order, so node ids stay deterministic
+fn sorted_function_owners(tcx: TyCtxt<'_>) -> Vec<(String, LocalDefId)> {
+    let mut owners: Vec<(String, LocalDefId)> = tcx
+        .hir_body_owners()
+        .filter(|def_id| is_function_like(tcx, *def_id))
+        .map(|def_id| (tcx.def_path_str(def_id.to_def_id()), def_id))
+        .collect();
+    owners.sort_by(|(left, _), (right, _)| left.cmp(right));
+    owners
+}
+
+// needed helper: one graph node per function-like body, keyed by its sorted index
+fn collect_nodes(
+    tcx: TyCtxt<'_>,
+    config: &build_graph::ReportConfig,
+    owners: &[(String, LocalDefId)],
+) -> CrateFunctionIndex {
     let mut graph = HonestyGraph::default();
     let mut paths: HashMap<LocalDefId, String> = HashMap::new();
     let mut node_ids: HashMap<LocalDefId, NodeId> = HashMap::new();
     let mut spans: HashMap<LocalDefId, Span> = HashMap::new();
-
-    let mut owners: Vec<(String, LocalDefId)> = tcx
-        .hir_body_owners()
-        .filter(|d| is_function_like(tcx, *d))
-        .map(|d| (tcx.def_path_str(d.to_def_id()), d))
-        .collect();
-    owners.sort_by(|(a, _), (b, _)| a.cmp(b));
+    let scan = build_graph::DirectCauseScan { tcx, config };
 
     for (index, (path_str, def_id)) in owners.iter().enumerate() {
         let id = NodeId(u32::try_from(index).unwrap_or(u32::MAX));
@@ -31,32 +55,40 @@ pub fn graph(tcx: TyCtxt<'_>, config: &build_graph::ReportConfig) -> Built {
         if let Some(span) = tcx.def_ident_span(def_id.to_def_id()) {
             spans.insert(*def_id, span);
         }
-        let direct = build_graph::classify::classify(tcx, *def_id, config);
+        let direct = scan.of(*def_id);
         graph.add_node(id, path_str.clone(), direct);
     }
 
-    for (_, def_id) in &owners {
-        let Some(caller) = node_ids.get(def_id).copied() else {
-            continue;
-        };
-        for callee_def in body_calls(tcx, *def_id, &node_ids) {
-            if let Some(callee) = node_ids.get(&callee_def).copied() {
-                graph.add_edge(caller, callee);
-            }
-        }
-        for child in closures_of(tcx, *def_id) {
-            if let Some(target) = node_ids.get(&child).copied() {
-                graph.add_edge(caller, target);
-            }
-        }
-    }
-
-    Built {
+    CrateFunctionIndex {
         graph,
         paths,
         node_ids,
         spans,
     }
+}
+
+// needed helper: caller -> callee edges, including closures defined inside the body
+fn with_calls_and_closures_linked(
+    tcx: TyCtxt<'_>,
+    owners: &[(String, LocalDefId)],
+    mut crate_functions: CrateFunctionIndex,
+) -> CrateFunctionIndex {
+    for (_, def_id) in owners {
+        let Some(caller) = crate_functions.node_ids.get(def_id).copied() else {
+            continue;
+        };
+        for callee_def in body_calls(tcx, *def_id, &crate_functions.node_ids) {
+            if let Some(callee) = crate_functions.node_ids.get(&callee_def).copied() {
+                crate_functions.graph.add_edge(caller, callee);
+            }
+        }
+        for child in closures_of(tcx, *def_id) {
+            if let Some(target) = crate_functions.node_ids.get(&child).copied() {
+                crate_functions.graph.add_edge(caller, target);
+            }
+        }
+    }
+    crate_functions
 }
 
 fn is_function_like(tcx: TyCtxt<'_>, def_id: LocalDefId) -> bool {

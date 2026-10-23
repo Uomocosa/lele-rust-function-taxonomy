@@ -6,26 +6,33 @@ use rustc_middle::ty::TyCtxt;
 use rustc_span::Span;
 
 use crate::build_graph;
+use crate::crate_function_index::CrateFunctionIndex;
 use crate::read_config;
 
-pub fn run(tcx: TyCtxt<'_>) {
+pub struct TaxonomyReport;
+
+#[rustfmt::skip]
+impl TaxonomyReport {
+    pub fn emit(tcx: TyCtxt<'_>) { emit_all(tcx, collect_diagnostics(tcx)); }
+}
+
+fn collect_diagnostics(tcx: TyCtxt<'_>) -> Vec<String> {
     let config = read_config();
     let crate_root = crate_root_dir();
-    let built = build_graph::graph::graph(tcx, &config);
-
-    let witnesses = built.graph.classify();
+    let crate_functions = CrateFunctionIndex::from_crate(tcx, &config);
+    let witnesses = crate_functions.graph.classify();
 
     let mut diagnostics: Vec<String> = Vec::new();
 
-    let mut ordered: Vec<(String, LocalDefId)> = built
+    let mut ordered: Vec<(String, LocalDefId)> = crate_functions
         .paths
         .iter()
         .map(|(id, path)| (path.clone(), *id))
         .collect();
-    ordered.sort_by(|(a, _), (b, _)| a.cmp(b));
+    ordered.sort_by(|(left, _), (right, _)| left.cmp(right));
 
     for (path_str, def_id) in ordered {
-        let Some(span) = built.spans.get(&def_id).copied() else {
+        let Some(span) = crate_functions.spans.get(&def_id).copied() else {
             continue;
         };
         let Some(rel) = span_file(tcx, span, &crate_root) else {
@@ -34,8 +41,7 @@ pub fn run(tcx: TyCtxt<'_>) {
         let Some(boundary) = config.boundary_for(&rel) else {
             continue;
         };
-        let node = built.node_ids.get(&def_id).copied();
-        let Some(node) = node else {
+        let Some(node) = crate_functions.node_ids.get(&def_id).copied() else {
             continue;
         };
         let Some(witness) = witnesses.get(&node) else {
@@ -48,11 +54,22 @@ pub fn run(tcx: TyCtxt<'_>) {
             loc.line,
             loc.col_display.saturating_add(1)
         );
-        diagnostics.push(build_graph::render::render(
-            &location, &path_str, witness, &built, boundary,
-        ));
+        diagnostics.push(
+            build_graph::finding::Finding {
+                location,
+                path_str,
+                witness,
+                crate_functions: &crate_functions,
+                boundary,
+            }
+            .render(),
+        );
     }
 
+    diagnostics
+}
+
+fn emit_all(tcx: TyCtxt<'_>, diagnostics: Vec<String>) {
     if diagnostics.is_empty() {
         return;
     }
@@ -71,6 +88,7 @@ fn span_file(tcx: TyCtxt<'_>, span: Span, crate_root: &Path) -> Option<PathBuf> 
     Some(rel.to_path_buf())
 }
 
+// needed helper: the directory the driver was launched from
 fn crate_root_dir() -> PathBuf {
     std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."))
 }

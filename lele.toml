@@ -1,3 +1,14 @@
+[[lele.boundary]]
+name    = "honesty decision core"
+why     = "The witness fixpoint is what decides honesty, so it must not reach hidden I/O itself."
+folders = ["methods/honesty_graph", "src/driver/roots"]
+require = "honest"
+
 [honesty]
 declared_honest = []
 declared_dishonest = []
+
+[[lele.lint.entry_points]]
+file = "src/run.rs"
+fn = "run"
+reason = "the crate's single operation: main() drives the whole taxonomy check through it"
