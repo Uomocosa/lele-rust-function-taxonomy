@@ -11,6 +11,12 @@ pub struct Config {
     pub declared_dishonest: Vec<lele_config::CallPath>,
 }
 
+#[atomic_delegates]
+impl TryFrom<&Path> for Config {
+    type Error = lele_config::LeleTomlError;
+    fn try_from(manifest_path: &Path) -> Result<Self, Self::Error> {}
+}
+
 #[rustfmt::skip]
 impl Config {
     pub fn honest_boundaries(&self) -> impl Iterator<Item = &lele_config::BoundaryEntry> {
@@ -22,12 +28,6 @@ impl Config {
     pub fn has_honest_boundary(&self) -> bool {
         self.honest_boundaries().next().is_some()
     }
-}
-
-#[atomic_delegates]
-impl TryFrom<&Path> for Config {
-    type Error = lele_config::LeleTomlError;
-    fn try_from(manifest_path: &Path) -> Result<Self, Self::Error> {}
 }
 
 #[atomic_delegates]

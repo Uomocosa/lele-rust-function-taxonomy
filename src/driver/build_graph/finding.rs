@@ -26,7 +26,7 @@ impl Finding<'_> {
         )
     }
 
-    fn hops(&self) -> String {
+    pub(crate) fn hops(&self) -> String {
         let chain: Vec<String> = self
             .witness
             .chain

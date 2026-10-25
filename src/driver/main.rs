@@ -7,11 +7,8 @@ extern crate rustc_interface;
 extern crate rustc_middle;
 extern crate rustc_span;
 
-use std::path::Path;
-
 use derive_more::Deref;
 use lele_rust_function_taxonomy::constants;
-use lele_rust_function_taxonomy::lele_config;
 use rustc_driver::{Callbacks, Compilation};
 use rustc_interface::interface;
 use rustc_middle::ty::TyCtxt;
@@ -19,8 +16,6 @@ use rustc_middle::ty::TyCtxt;
 mod build_graph;
 mod crate_function_index;
 mod roots;
-
-use build_graph::ReportConfig;
 
 #[derive(Deref)]
 struct ShouldReport(bool);
@@ -31,17 +26,6 @@ impl Callbacks for ShouldReport {
             build_graph::TaxonomyReport::emit(tcx);
         }
         Compilation::Continue
-    }
-}
-
-fn read_config() -> ReportConfig {
-    let config = std::env::var_os(constants::ENV_MANIFEST)
-        .and_then(|manifest| lele_config::Config::try_from(Path::new(&manifest)).ok())
-        .unwrap_or_default();
-    ReportConfig {
-        honest_boundaries: config.honest_boundaries().cloned().collect(),
-        declared_honest: config.declared_honest,
-        declared_dishonest: config.declared_dishonest,
     }
 }
 

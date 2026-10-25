@@ -7,20 +7,13 @@ use crate::basic::constants;
 
 pub struct Toolchain;
 
+#[rustfmt::skip]
 impl Toolchain {
-    pub fn cargo() -> String {
-        std::env::var("CARGO").unwrap_or_else(|_| "cargo".to_string())
-    }
+    pub fn cargo() -> String { std::env::var("CARGO").unwrap_or_else(|_| "cargo".to_string()) }
 
-    pub fn sysroot() -> String {
-        option_env!("LELE_TAXONOMY_SYSROOT")
-            .map(str::to_string)
-            .unwrap_or_default()
-    }
+    pub fn sysroot() -> String { option_env!("LELE_TAXONOMY_SYSROOT").map(str::to_string).unwrap_or_default() }
 
-    pub fn sysroot_lib() -> PathBuf {
-        Path::new(&Self::sysroot()).join("lib")
-    }
+    pub fn sysroot_lib() -> PathBuf { Path::new(&Self::sysroot()).join("lib") }
 
     pub fn pinned_cargo() -> PathBuf {
         let candidate = Path::new(&Self::sysroot()).join("bin/cargo");
@@ -50,9 +43,7 @@ impl Toolchain {
         Self::home_dir().join(constants::CACHE_TARGET_DIR)
     }
 
-    pub fn driver_target_dir() -> PathBuf {
-        Self::home_dir().join(constants::DRIVER_CACHE_TARGET_DIR)
-    }
+    pub fn driver_target_dir() -> PathBuf { Self::home_dir().join(constants::DRIVER_CACHE_TARGET_DIR) }
 }
 
 #[atomic_delegates]

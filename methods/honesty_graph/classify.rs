@@ -4,7 +4,6 @@ use crate::HonestyGraph;
 use crate::NodeId;
 use crate::Witness;
 
-// needed helper: deterministic worklist fixpoint; returns shortest witness per dishonest node
 pub fn classify(graph: &HonestyGraph) -> BTreeMap<NodeId, Witness> {
     let mut witnesses: BTreeMap<NodeId, Witness> = BTreeMap::new();
     let mut queue: VecDeque<NodeId> = VecDeque::new();
