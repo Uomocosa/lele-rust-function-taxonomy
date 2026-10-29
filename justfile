@@ -42,7 +42,7 @@ fixtures-lock:
     for manifest in tests/fixtures/*/Cargo.toml; do cargo metadata --manifest-path "$manifest" --format-version 1 > /dev/null; done
 
 setup:
-    prek install -t pre-commit -t pre-push
+    prek install -t pre-commit -t pre-push -t post-commit
 
 check:
     prek run --all-files
