@@ -17,9 +17,9 @@ path = "src/driver/main.rs"
 
 [dependencies]
 atomic-delegate-macros = { git = "https://github.com/Uomocosa/lele-rust-linter", tag = "v0.0.10" }
-clap = { version = "=4.6.6", features = ["derive"] }
+clap = { version = "=4.6.7", features = ["derive"] }
 derive_more = { version = "=2.1.1", features = ["deref", "display", "from"] }
-thiserror = "=2.0.19"
+thiserror = "=2.0.21"
 serde = { version = "=1.0.229", features = ["derive"] }
 toml = "=0.8.23"
 tracing = "=0.1.44"
