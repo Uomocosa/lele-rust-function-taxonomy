@@ -1,5 +1,5 @@
 use lele_rust_function_taxonomy::lele_config;
-use lele_rust_function_taxonomy::Diagnostic;
+use lele_rust_function_taxonomy::traits::Diagnostic;
 use lele_rust_function_taxonomy::Tax001;
 use lele_rust_function_taxonomy::Witness;
 

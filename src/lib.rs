@@ -5,13 +5,13 @@ pub mod lele_config;
 pub mod toolchain;
 
 #[path = "__basic__/mod.rs"]
-pub mod basic;
+mod basic;
 
 #[path = "__traits__/mod.rs"]
 pub mod traits;
 
 #[path = "../__methods__/mod.rs"]
-pub mod methods;
+mod methods;
 
 mod failure_reason;
 mod run;
@@ -31,4 +31,3 @@ pub use run::run;
 pub use tax001::Tax001;
 pub use tax002::Tax002;
 pub use toolchain::Toolchain;
-pub use traits::Diagnostic;

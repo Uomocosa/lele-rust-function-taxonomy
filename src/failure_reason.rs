@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use thiserror::Error;
 
 use crate::lele_config;
-use crate::Diagnostic;
+use crate::traits::Diagnostic;
 use crate::Tax002;
 
 #[derive(Debug, Error)]

@@ -1,4 +1,4 @@
-use crate::Diagnostic;
+use crate::traits::Diagnostic;
 
 pub struct Tax001;
 
