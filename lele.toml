@@ -9,6 +9,6 @@ declared_honest = []
 declared_dishonest = []
 
 [[lele.lint.entry_points]]
-file = "src/run.rs"
+file = "crates/lele-rust-function-taxonomy/src/run.rs"
 fn = "run"
 reason = "the crate's single operation: main() drives the whole taxonomy check through it"
