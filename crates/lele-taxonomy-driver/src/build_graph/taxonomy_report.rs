@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
+use atomic_delegate_macros::atomic_delegates;
 use rustc_errors::DiagCtxtHandle;
 use rustc_hir::def_id::LocalDefId;
 use rustc_middle::ty::TyCtxt;
@@ -209,8 +210,15 @@ impl TaxonomyReport {
             .source_map()
             .lookup_source_file(span.source_callsite().lo());
         let path = file.name.clone().into_local_path()?;
-        Some(path.strip_prefix(crate_root).unwrap_or(&path).to_path_buf())
+        Some(Self::normalize_components(
+            path.strip_prefix(crate_root).unwrap_or(&path),
+        ))
     }
+}
+
+#[atomic_delegates]
+impl TaxonomyReport {
+    pub(crate) fn normalize_components(path: &Path) -> PathBuf {}
 }
 
 // no test_usage necessary
