@@ -63,8 +63,8 @@ dependencies = [
 
 [[package]]
 name = "atomic-delegate-macros"
-version = "0.0.13"
-source = "git+https://github.com/Uomocosa/lele-rust-linter?tag=v0.0.13#aa2c8d8028fd7fff5e664d3e0aca61b47a581681"
+version = "0.0.14"
+source = "git+https://github.com/Uomocosa/lele-rust-linter?tag=v0.0.14#8f850b870fbada6ee5a4b346423382a69d13e1d2"
 dependencies = [
  "lele-snake-case",
  "proc-macro2",
@@ -266,7 +266,7 @@ checksum = "20870f649af7073d53e38067b2a84312175d56ea15217e1b15bc83506ec50afb"
 
 [[package]]
 name = "lele-rust-function-taxonomy"
-version = "0.0.10"
+version = "0.0.11"
 dependencies = [
  "atomic-delegate-macros",
  "clap",
@@ -282,12 +282,12 @@ dependencies = [
 
 [[package]]
 name = "lele-snake-case"
-version = "0.0.13"
-source = "git+https://github.com/Uomocosa/lele-rust-linter?tag=v0.0.13#aa2c8d8028fd7fff5e664d3e0aca61b47a581681"
+version = "0.0.14"
+source = "git+https://github.com/Uomocosa/lele-rust-linter?tag=v0.0.14#8f850b870fbada6ee5a4b346423382a69d13e1d2"
 
 [[package]]
 name = "lele-taxonomy-driver"
-version = "0.0.10"
+version = "0.0.11"
 dependencies = [
  "atomic-delegate-macros",
  "derive_more",
