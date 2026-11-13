@@ -4,22 +4,23 @@ set shell := ["bash", "-eu", "-o", "pipefail", "-c"]
 # Extra tools: cargo-nextest, just, and `lele-lint`.
 
 build:
-    cargo build --all-targets --all-features
+    cargo build --workspace --all-targets --all-features
 
 clippy:
-    cargo clippy --all-targets --all-features -- -D warnings
+    cargo clippy --workspace --all-targets --all-features -- -D warnings
 
 fmt:
-    cargo fmt -- --check
+    cargo fmt --all -- --check
 
 test:
-    cargo nextest run --all-targets --all-features
+    cargo nextest run --workspace --all-targets --all-features
 
 taxonomy:
     cargo run --bin lele-function-taxonomy -- --manifest-path ./Cargo.toml
 
 lint:
-    lele-lint .
+    lele-lint --config lele.toml crates/lele-rust-function-taxonomy
+    lele-lint --config lele.toml crates/lele-taxonomy-driver
 
 # --- tool install (reproducible) ---------------------------------------------
 # Install the tool binary only, honouring Cargo.lock. `--bin` keeps the internal
@@ -28,7 +29,7 @@ lint:
 # comes from rust-toolchain.toml (nightly + rustc-dev) because the driver is
 # built with rustc_private.
 install:
-    cargo install --locked --force --path . --bin lele-function-taxonomy
+    cargo install --locked --force --path crates/lele-rust-function-taxonomy --bin lele-function-taxonomy
 
 # Show which binary each tool resolves to and its version. A `<fleet>/bin` shim
 # (written by `lele-release setup`) builds the sibling checkout; set
@@ -39,7 +40,7 @@ tools:
 # Regenerate every fixture's committed Cargo.lock after changing its manifest
 # (fixtures are hermetic: the lock pins the exact dependency revisions).
 fixtures-lock:
-    for manifest in tests/fixtures/*/Cargo.toml; do cargo metadata --manifest-path "$manifest" --format-version 1 > /dev/null; done
+    for manifest in crates/lele-rust-function-taxonomy/tests/fixtures/*/Cargo.toml; do cargo metadata --manifest-path "$manifest" --format-version 1 > /dev/null; done
 
 setup:
     prek install -t pre-commit -t pre-push -t post-commit

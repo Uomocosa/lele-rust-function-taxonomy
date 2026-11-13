@@ -286,6 +286,15 @@ version = "0.0.12"
 source = "git+https://github.com/Uomocosa/lele-rust-linter?tag=v0.0.12#0372ea12bce5e4a494b3faec841ae053ff28ca7b"
 
 [[package]]
+name = "lele-taxonomy-driver"
+version = "0.0.9"
+dependencies = [
+ "atomic-delegate-macros",
+ "derive_more",
+ "lele-rust-function-taxonomy",
+]
+
+[[package]]
 name = "libc"
 version = "0.2.190"
 source = "registry+https://github.com/rust-lang/crates.io-index"

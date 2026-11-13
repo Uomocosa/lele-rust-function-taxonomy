@@ -1,31 +1,30 @@
-[package]
-name = "lele-rust-function-taxonomy"
+[workspace]
+resolver = "2"
+members = [
+    "crates/lele-rust-function-taxonomy",
+    "crates/lele-taxonomy-driver",
+]
+
+[workspace.package]
 version = "0.0.9"
 edition = "2021"
 rust-version = "1.85"
-description = "Precise function honesty taxonomy via rustc MIR — a require=honest boundary must contain only honest functions"
 license = "MIT"
-default-run = "lele-function-taxonomy"
 
-[[bin]]
-name = "lele-function-taxonomy"
-path = "src/main.rs"
-
-[[bin]]
-name = "lele-taxonomy-driver"
-path = "src/driver/main.rs"
-
-[dependencies]
+[workspace.dependencies]
 atomic-delegate-macros = { git = "https://github.com/Uomocosa/lele-rust-linter", tag = "v0.0.12" }
 clap = { version = "=4.6.7", features = ["derive"] }
-derive_more = { version = "=2.1.1", features = ["deref", "display", "from"] }
+derive_more = { version = "=2.1.1" }
 thiserror = "=2.0.21"
 serde = { version = "=1.0.229", features = ["derive"] }
 toml = "=0.8.23"
 tracing = "=0.1.44"
 tracing-subscriber = { version = "=0.3.23", features = ["env-filter"] }
+tempfile = "=3.27.0"
+rstest = "=0.28.0"
+lele-rust-function-taxonomy = { path = "crates/lele-rust-function-taxonomy" }
 
-[lints.clippy]
+[workspace.lints.clippy]
 pedantic = { level = "deny", priority = -1 }
 nursery = { level = "deny", priority = -1 }
 unwrap_used = "deny"
@@ -69,10 +68,6 @@ unnecessary_trailing_comma = "allow"
 unnested_or_patterns = "allow"
 used_underscore_binding = "allow"
 use_self = "allow"
-
-[dev-dependencies]
-tempfile = "=3.27.0"
-rstest = "=0.28.0"
 
 # Early-phase profile: optimise for compile time and peak RAM, not runtime speed.
 # Debug info is a big RAM/disk cost; keep only line tables for our crate

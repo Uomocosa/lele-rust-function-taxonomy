@@ -1,0 +1,20 @@
+[package]
+name = "lele-taxonomy-driver"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+description = "rustc MIR driver for lele-function-taxonomy (internal: built and run by the tool, not installed)"
+license.workspace = true
+publish = false
+
+[[bin]]
+name = "lele-taxonomy-driver"
+path = "src/main.rs"
+
+[dependencies]
+atomic-delegate-macros.workspace = true
+derive_more = { workspace = true, features = ["deref"] }
+lele-rust-function-taxonomy.workspace = true
+
+[lints]
+workspace = true
