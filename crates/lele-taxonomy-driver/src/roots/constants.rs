@@ -28,5 +28,3 @@ pub const DEFAULT_ROOTS: &[&str] = &[
     "tokio::process::",
     "tokio::signal::",
 ];
-
-// no test_usage necessary

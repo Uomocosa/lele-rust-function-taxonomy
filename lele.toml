@@ -1,3 +1,7 @@
+[lele.config]
+# Drives the built `lele-function-taxonomy` binary against hermetic fixture crates.
+e2e_test_dirs = ["crates/lele-rust-function-taxonomy/tests"]
+
 [[lele.boundary]]
 name    = "honesty decision core"
 why     = "The witness fixpoint is what decides honesty, so it must not reach hidden I/O itself."

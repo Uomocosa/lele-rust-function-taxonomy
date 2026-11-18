@@ -19,5 +19,3 @@ pub enum FailureReason {
     #[error("cargo check reported errors")]
     CargoCheckFailed,
 }
-
-// no test_usage necessary
