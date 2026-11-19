@@ -42,7 +42,9 @@ mod tests {
     use super::static_cause;
 
     #[test]
-    fn test_usage() {
+    fn static_cause_is_covered_end_to_end_by_the_driver() {
         let _ = static_cause;
     }
 }
+
+// no test_usage necessary

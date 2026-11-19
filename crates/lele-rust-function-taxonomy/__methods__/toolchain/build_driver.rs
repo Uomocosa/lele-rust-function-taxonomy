@@ -33,6 +33,10 @@ mod tests {
 
     #[test]
     fn test_usage() {
-        let _ = build_driver;
+        let driver = build_driver();
+        assert!(
+            driver.is_some_and(|path| path.is_file()),
+            "build_driver should produce the driver binary"
+        );
     }
 }

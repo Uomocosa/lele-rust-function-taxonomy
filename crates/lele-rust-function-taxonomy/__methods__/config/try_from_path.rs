@@ -35,7 +35,8 @@ mod tests {
             "[honesty]\nhonesty_depth = 1\n",
         )
         .unwrap();
+        let loaded = try_from_path(manifest.as_path());
+        assert!(loaded.is_err());
         assert!(lele_config::Config::try_from(manifest.as_path()).is_err());
-        let _ = try_from_path;
     }
 }
