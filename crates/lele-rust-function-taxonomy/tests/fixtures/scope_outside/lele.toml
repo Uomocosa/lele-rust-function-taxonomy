@@ -1,4 +1,4 @@
-[[lele.boundary]]
+[[lele.project.boundary]]
 name    = "small honest core"
 why     = "Only src/core is checked."
 folders = ["src/core"]

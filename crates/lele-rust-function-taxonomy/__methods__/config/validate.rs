@@ -47,7 +47,7 @@ mod tests {
         std::fs::write(&manifest, "").unwrap();
         std::fs::write(
             tmp.path().join("lele.toml"),
-            "[[lele.boundary]]\nname = \"b\"\nwhy = \"w\"\nfolders = [\"src/nope\"]\nrequire = \"honest\"\n",
+            "[[lele.project.boundary]]\nname = \"b\"\nwhy = \"w\"\nfolders = [\"src/nope\"]\nrequire = \"honest\"\n",
         )
         .unwrap();
         let loaded = lele_config::Config::try_from(manifest.as_path()).unwrap();

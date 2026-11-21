@@ -13,6 +13,12 @@ pub struct LeleToml {
 #[derive(Debug, Clone, Deserialize, Default)]
 pub struct LeleSection {
     #[serde(default)]
+    pub project: ProjectSection,
+}
+
+#[derive(Debug, Clone, Deserialize, Default)]
+pub struct ProjectSection {
+    #[serde(default)]
     pub boundary: Vec<BoundaryEntry>,
 }
 

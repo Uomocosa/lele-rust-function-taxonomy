@@ -1,4 +1,4 @@
-[[lele.boundary]]
+[[lele.project.boundary]]
 name    = "honest core"
 why     = "Uses a removed honesty key."
 folders = ["src/core"]

@@ -41,7 +41,7 @@ mod tests {
         std::fs::write(&manifest, "").unwrap();
         std::fs::write(
             tmp.path().join("lele.toml"),
-            "[[lele.boundary]]\nname = \"b\"\nwhy = \"w\"\nfolders = [\"src/core\"]\nrequire = \"honest\"\n",
+            "[[lele.project.boundary]]\nname = \"b\"\nwhy = \"w\"\nfolders = [\"src/core\"]\nrequire = \"honest\"\n",
         )
         .unwrap();
         std::fs::create_dir_all(tmp.path().join("src/core")).unwrap();

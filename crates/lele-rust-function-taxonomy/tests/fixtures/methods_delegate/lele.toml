@@ -1,4 +1,4 @@
-[[lele.boundary]]
+[[lele.project.boundary]]
 name    = "delegate core"
 why     = "A shell in the boundary delegates into methods/ which reads the clock."
 folders = ["src/core"]

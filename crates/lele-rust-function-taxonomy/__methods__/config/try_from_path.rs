@@ -14,7 +14,7 @@ pub fn try_from_path(
     let parsed: lele_config::LeleToml = toml::from_str(&content)
         .map_err(|toml_error| lele_config::LeleTomlError::InvalidToml { file, toml_error })?;
     Ok(lele_config::Config {
-        boundaries: parsed.lele.boundary,
+        boundaries: parsed.lele.project.boundary,
         declared_honest: parsed.honesty.declared_honest,
         declared_dishonest: parsed.honesty.declared_dishonest,
     })

@@ -19,6 +19,7 @@ taxonomy:
     cargo run --bin lele-function-taxonomy -- --manifest-path ./Cargo.toml
 
 lint:
+    lele-lint --config lele.toml --sync-config --check crates/lele-rust-function-taxonomy
     lele-lint --config lele.toml crates/lele-rust-function-taxonomy
     lele-lint --config lele.toml crates/lele-taxonomy-driver
 

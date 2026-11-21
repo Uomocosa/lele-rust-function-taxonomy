@@ -21,7 +21,7 @@ mod tests {
         std::fs::write(&manifest, "").unwrap();
         std::fs::write(
             tmp.path().join("lele.toml"),
-            "[[lele.boundary]]\nname = \"core\"\nwhy = \"w\"\nfolders = [\"src/core\"]\nrequire = \"honest\"\n\n[[lele.boundary]]\nname = \"plain\"\nwhy = \"w\"\nfolders = [\"src/plain\"]\n",
+            "[[lele.project.boundary]]\nname = \"core\"\nwhy = \"w\"\nfolders = [\"src/core\"]\nrequire = \"honest\"\n\n[[lele.project.boundary]]\nname = \"plain\"\nwhy = \"w\"\nfolders = [\"src/plain\"]\n",
         )
         .unwrap();
         let config = lele_config::Config::try_from(manifest.as_path()).unwrap();

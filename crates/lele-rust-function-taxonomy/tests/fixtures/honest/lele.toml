@@ -1,4 +1,4 @@
-[[lele.boundary]]
+[[lele.project.boundary]]
 name    = "honest core"
 why     = "Everything here must be honest."
 folders = ["src/core"]

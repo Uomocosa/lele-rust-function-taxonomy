@@ -1,4 +1,4 @@
-[[lele.boundary]]
+[[lele.project.boundary]]
 name    = "broken"
 why     = "Names a folder that does not exist."
 folders = ["src/does_not_exist"]

@@ -1,4 +1,4 @@
-[[lele.boundary]]
+[[lele.project.boundary]]
 name    = "dishonest core"
 why     = "Every function here reaches hidden input/output."
 folders = ["src/core"]
